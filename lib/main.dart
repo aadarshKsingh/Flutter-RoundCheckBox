@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(RoundCheckBox());
+  runApp(ChangeNotifierProvider<ChangeStatus>(
+      create: (_) => ChangeStatus(), child: RoundCheckBox()));
 }
 
 List<String> items = [
@@ -39,25 +41,35 @@ class _RoundCheckBoxState extends State<RoundCheckBox> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-          appBar: AppBar(
-            title: Text("Flutter CheckBoxes"),
-          ),
-          body: ListView.builder(
-              itemCount: items.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                    title: Text(items[index]),
-                    leading: IconButton(
-                        icon: Icon(itemsCheck[index]),
-                        onPressed: () {
-                          setState(() {
-                            if (itemsCheck[index] == Icons.check_circle_outline)
-                              itemsCheck[index] = Icons.check_circle;
-                            else
-                              itemsCheck[index] = Icons.check_circle_outline;
-                          });
-                        }));
-              })),
+        appBar: AppBar(
+          title: Text("Flutter CheckBoxes"),
+        ),
+        body: ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(
+                  title: Text(items[index]),
+                  leading: IconButton(
+                      icon: Consumer<ChangeStatus>(
+                        builder: (context, value, child) =>
+                            Icon(itemsCheck[index]),
+                      ),
+                      onPressed: () =>
+                          Provider.of<ChangeStatus>(context, listen: false)
+                              .changeStatus(index)));
+            }),
+      ),
     );
+  }
+}
+
+class ChangeStatus extends ChangeNotifier {
+  void changeStatus(int index) {
+    if (itemsCheck[index] == Icons.check_circle_outline) {
+      itemsCheck[index] = Icons.check_circle;
+    } else {
+      itemsCheck[index] = Icons.check_circle_outline;
+    }
+    notifyListeners();
   }
 }
